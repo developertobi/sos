@@ -1,5 +1,6 @@
 package com.example.sosapp
 
+import RestApiService
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
@@ -7,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
@@ -22,6 +24,7 @@ import java.io.*
 class PicturePreviewActivity : AppCompatActivity() {
     lateinit var textView: TextView
      var send: SendTo? = null
+    lateinit var imageString : String
 
 
     companion object {
@@ -67,40 +70,38 @@ class PicturePreviewActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.share) {
-
             encodeImage()
-
-
-            Toast.makeText(this, "Scene details sent successfully", Toast.LENGTH_SHORT).show()
-
-            SendTo().sendToServer()
-
-
+            sendDummySOS()
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
-    fun encodeImage() {
-
+    private fun encodeImage() {
+                    Log.e("PicturePreviewActivity", "encodeImage: called")
         val imageView = findViewById<ImageView>(R.id.image)
-
+//        var imageString: String
         imageView.drawable?.let {
            val mBitmap = (it as BitmapDrawable).bitmap
         val baos = ByteArrayOutputStream()
         mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val imageBytes = baos.toByteArray()
-        var image = Base64.encodeToString(imageBytes, Base64.DEFAULT)
-
-       //  image = addDummyUser(image)
-
-
+//        val imageBytes = baos.toByteArray()
+        imageString = Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT)
+//            println("imageString == $imageString")
+//            Log.e("PicturePreviewActivity", "encodeImage: imageString == $imageString"
+        }
     }
 
-
-
+    private fun sendDummySOS() {
+        Log.e("PicturePreviewActivity", "sendDummySOS: Called")
+        val apiService = RestApiService()
+        val userInfo = UserInfo(phoneNumbers = arrayOf("090909090", "090909090"), image = imageString, location = LocationDetails(latitude = "3.77772222", longitude = "0.99900033"))
+//        Log.e("PicturePreviewActivity", "sendDummySOS: userInfo $userInfo")
+        Log.e("PicturePreviewActivity", "sendDummySOS: userInfo ${userInfo.phoneNumbers?.get(1)}")
+        Log.e("PicturePreviewActivity", "sendDummySOS: userInfo ${userInfo.location.latitude}")
+        Log.e("PicturePreviewActivity", "sendDummySOS: userInfo ${userInfo.location.longitude}")
+//        Log.e("PicturePreviewActivity", "sendDummySOS: userInfo ${userInfo.image}")
+        apiService.sendSOS(userInfo)
+//        apiService.postDummy()
     }
-
-
-
-    }
+}
